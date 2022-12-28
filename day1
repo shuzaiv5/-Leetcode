@@ -1,0 +1,62 @@
+704. 二分查找
+
+题目描述：给定一个 n 个元素有序的（升序）整型数组 nums 和一个目标值 target  ，写一个函数搜索 nums 中的 target，如果目标值存在返回下标，否则返回 -1。
+
+个人解题链接（全闭写法）
+
+https://leetcode.cn/problems/binary-search/
+
+解题心得： 1 注意开闭合区间； 2，注意middle的计算 3.注意return的使用，只有等于target时才使用。4.若使用左闭右开区间，需注意变量初始化以及和target比较时<,>,=的取值。
+
+class Solution {
+    public int search(int[] nums, int target) {
+        int l = 0;
+        int r = nums.length - 1;
+        while (l <= target){
+            int m = (l + r) / 2;
+            if(nums[m] > r)
+                return r = m - 1;
+            else if(nums[m] == target)
+                return m;
+            else if(nums[m] < target)
+                return l = m + 1;
+        }
+        return -1;
+    }
+}
+27. 移除元素
+
+给你一个数组 nums 和一个值 val，你需要 原地 移除所有数值等于 val 的元素，并返回移除后数组的新长度。
+
+不要使用额外的数组空间，你必须仅使用 O(1) 额外空间并原地修改输入数组。
+
+元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。
+
+示例 1: 给定 nums = [3,2,2,3], val = 3, 函数应该返回新的长度 2, 并且 nums 中的前两个元素均为 2。 你不需要考虑数组中超出新长度后面的元素。
+
+示例 2: 给定 nums = [0,1,2,2,3,0,4,2], val = 2, 函数应该返回新的长度 5, 并且 nums 中的前五个元素为 0, 1, 3, 0, 4。
+
+解题思路： 通过上下两个指针对同一数组进行处理，上指针遍历整个数组，然后将数组值赋给不是目标val值给下指针，下指针的下标+1.
+
+代码实现：
+
+class Solution {
+    public int removeElement(int[] nums, int val) {
+        int down = 0;//下指针初始化值
+        //上指针遍历数组
+        for(int up = 0; up < nums.length; up++){
+            // 上指针不等于目标删除val值时，对下指针对应的下标进行赋值；
+            if(nums[up] != val){
+                nums[down] = nums[up];
+                down++;
+            }
+        }
+        return down;
+    }
+}
+总结：经过两题的练习，对于数组的定义，元素，下标，地址值等有了更深刻的理解，同时也开阔了解题思维，学习摸索更快更高效解法。同时对于二分法查找的一些细节如开闭区间，=号的使用等等有了更深入的学习和判断。
+
+
+————————————————
+版权声明：本文为CSDN博主「shuzai1」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/shuzai1/article/details/128475811
