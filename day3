@@ -1,0 +1,497 @@
+
+关于链表，你该了解这些！
+什么是链表，链表是一种通过指针串联在一起的线性结构，每一个节点由两部分组成，一个是数据域一个是指针域（存放指向下一个节点的指针），最后一个节点的指针域指向null（空指针的意思）。
+
+链表的入口节点称为链表的头结点也就是head。
+
+如图所示： 
+
+#链表的类型
+接下来说一下链表的几种类型:
+
+#单链表
+刚刚说的就是单链表。
+
+#双链表
+单链表中的指针域只能指向节点的下一个节点。
+
+双链表：每一个节点有两个指针域，一个指向下一个节点，一个指向上一个节点。
+
+双链表 既可以向前查询也可以向后查询。
+
+如图所示： 
+
+#循环链表
+循环链表，顾名思义，就是链表首尾相连。
+
+循环链表可以用来解决约瑟夫环问题。
+
+
+
+#链表的存储方式
+了解完链表的类型，再来说一说链表在内存中的存储方式。
+
+数组是在内存中是连续分布的，但是链表在内存中可不是连续分布的。
+
+链表是通过指针域的指针链接在内存中各个节点。
+
+所以链表中的节点在内存中不是连续分布的 ，而是散乱分布在内存中的某地址上，分配机制取决于操作系统的内存管理。
+
+如图所示：
+
+
+
+这个链表起始节点为2， 终止节点为7， 各个节点分布在内存的不同地址空间上，通过指针串联在一起。
+
+#链表的定义
+接下来说一说链表的定义。
+
+链表节点的定义，很多同学在面试的时候都写不好。
+
+这是因为平时在刷leetcode的时候，链表的节点都默认定义好了，直接用就行了，所以同学们都没有注意到链表的节点是如何定义的。
+
+而在面试的时候，一旦要自己手写链表，就写的错漏百出。
+
+这里我给出C/C++的定义链表节点方式，如下所示：
+
+// 单链表
+struct ListNode {
+    int val;  // 节点上存储的元素
+    ListNode *next;  // 指向下一个节点的指针
+    ListNode(int x) : val(x), next(NULL) {}  // 节点的构造函数
+};
+有同学说了，我不定义构造函数行不行，答案是可以的，C++默认生成一个构造函数。
+
+但是这个构造函数不会初始化任何成员变量，下面我来举两个例子：
+
+通过自己定义构造函数初始化节点：
+
+ListNode* head = new ListNode(5);
+使用默认构造函数初始化节点：
+
+ListNode* head = new ListNode();
+head->val = 5;
+所以如果不定义构造函数使用默认构造函数的话，在初始化的时候就不能直接给变量赋值！
+
+#链表的操作
+#删除节点
+删除D节点，如图所示：
+
+
+
+只要将C节点的next指针 指向E节点就可以了。
+
+那有同学说了，D节点不是依然存留在内存里么？只不过是没有在这个链表里而已。
+
+是这样的，所以在C++里最好是再手动释放这个D节点，释放这块内存。
+
+其他语言例如Java、Python，就有自己的内存回收机制，就不用自己手动释放了。
+
+#添加节点
+如图所示：
+
+
+
+可以看出链表的增添和删除都是O(1)操作，也不会影响到其他节点。
+
+但是要注意，要是删除第五个节点，需要从头节点查找到第四个节点通过next指针进行删除操作，查找的时间复杂度是O(n)。
+
+#性能分析
+再把链表的特性和数组的特性进行一个对比，如图所示：
+
+
+
+数组在定义的时候，长度就是固定的，如果想改动数组的长度，就需要重新定义一个新的数组。
+
+链表的长度可以是不固定的，并且可以动态增删， 适合数据量不固定，频繁增删，较少查询的场景。
+
+相信大家已经对链表足够的了解，后面我会讲解关于链表的高频面试题目，我们下期见！
+
+#其他语言版本
+Java：
+
+public class ListNode {
+    // 结点的值
+    int val;
+ 
+    // 下一个结点
+    ListNode next;
+ 
+    // 节点的构造函数(无参)
+    public ListNode() {
+    }
+ 
+    // 节点的构造函数(有一个参数)
+    public ListNode(int val) {
+        this.val = val;
+    }
+ 
+    // 节点的构造函数(有两个参数)
+    public ListNode(int val, ListNode next) {
+        this.val = val;
+        this.next = next;
+    }
+}
+
+Python：
+
+class ListNode:
+    def __init__(self, val, next=None):
+        self.val = val
+        self.next = next
+203. 移除链表元素
+
+给你一个链表的头节点 head 和一个整数 val ，请你删除链表中所有满足 Node.val == val 的节点，并返回 新的头节点 。
+示例 1：
+
+
+
+输入：head = [1,2,6,3,4,5,6], val = 6
+输出：[1,2,3,4,5]
+示例 2：
+
+输入：head = [], val = 1
+输出：[]
+示例 3：
+
+输入：head = [7,7,7,7], val = 7
+输出：[]
+
+提示：
+
+列表中的节点数目在范围 [0, 104] 内
+1 <= Node.val <= 50
+0 <= val <= 50
+
+解题思路：
+
+方法一： 删除节点若为头节点，则将头节点指针下移，即head=head.next；若不是头节点，则将next指向所删节点的下一个节点头。
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode removeElements(ListNode head, int val) {
+        //判断初始节点是否为空以及是否是目标删除节点
+        if(head == null){return head;}
+        while(head != null && head.val == val){
+            head = head.next;
+        }
+        ListNode current = head;//定义头节点为现节点
+        while(current != null){
+            if(current.next != null && current.next.val == val){
+                current.next = current.next.next;
+            }else{
+                current = current.next;
+            }
+           
+        }
+         return head;
+    }
+}
+
+方法二：增加一个虚拟头节点，则删除节点可将next指针指向指向所删节点的下一个节点头。
+
+class Solution {
+    public ListNode removeElements(ListNode head, int val) {
+        //判断初始节点是否为空以及是否是目标删除节点
+        if(head == null){return head;}
+        //添加虚拟头节点并初始化
+        ListNode pre_head = new ListNode(-1, head);
+        ListNode pre = pre_head;
+        ListNode current = head;
+        while(current != null){//不能用for???
+            if(current.val == val){
+                pre.next = current.next;
+            }else{
+                pre = current;
+            }
+            current = current.next;
+        }
+        return pre_head.next;
+    }
+}
+
+707. 设计链表
+
+设计链表的实现。您可以选择使用单链表或双链表。单链表中的节点应该具有两个属性：val 和 next。val 是当前节点的值，next 是指向下一个节点的指针/引用。如果要使用双向链表，则还需要一个属性 prev 以指示链表中的上一个节点。假设链表中的所有节点都是 0-index 的。
+
+在链表类中实现这些功能：
+
+get(index)：获取链表中第 index 个节点的值。如果索引无效，则返回-1。
+addAtHead(val)：在链表的第一个元素之前添加一个值为 val 的节点。插入后，新节点将成为链表的第一个节点。
+addAtTail(val)：将值为 val 的节点追加到链表的最后一个元素。
+addAtIndex(index,val)：在链表中的第 index 个节点之前添加值为 val  的节点。如果 index 等于链表的长度，则该节点将附加到链表的末尾。如果 index 大于链表长度，则不会插入节点。如果index小于0，则在头部插入节点。
+deleteAtIndex(index)：如果索引 index 有效，则删除链表中的第 index 个节点。
+
+示例：
+
+MyLinkedList linkedList = new MyLinkedList();
+linkedList.addAtHead(1);
+linkedList.addAtTail(3);
+linkedList.addAtIndex(1,2);   //链表变为1-> 2-> 3
+linkedList.get(1);            //返回2
+linkedList.deleteAtIndex(1);  //现在链表是1-> 3
+linkedList.get(1);            //返回3
+
+解题思路：题目考查链表的基本操作，分单链表和双链表两种情况
+
+单链表：
+
+//单链表
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode(){}
+    ListNode(int val) {
+        this.val=val;
+    }
+}
+class MyLinkedList {
+    //size存储链表元素的个数
+    int size;
+    //虚拟头结点
+    ListNode head;
+ 
+    //初始化链表
+    public MyLinkedList() {
+        size = 0;
+        head = new ListNode(0);
+    }
+ 
+    //获取第index个节点的数值，注意index是从0开始的，第0个节点就是头结点
+    public int get(int index) {
+        //如果index非法，返回-1
+        if (index < 0 || index >= size) {
+            return -1;
+        }
+        ListNode currentNode = head;
+        //包含一个虚拟头节点，所以查找第 index+1 个节点
+        for (int i = 0; i <= index; i++) {
+            currentNode = currentNode.next;
+        }
+        return currentNode.val;
+    }
+ 
+    //在链表最前面插入一个节点，等价于在第0个元素前添加
+    public void addAtHead(int val) {
+        addAtIndex(0, val);
+    }
+ 
+    //在链表的最后插入一个节点，等价于在(末尾+1)个元素前添加
+    public void addAtTail(int val) {
+        addAtIndex(size, val);
+    }
+ 
+    // 在第 index 个节点之前插入一个新节点，例如index为0，那么新插入的节点为链表的新头节点。
+    // 如果 index 等于链表的长度，则说明是新插入的节点为链表的尾结点
+    // 如果 index 大于链表的长度，则返回空
+    public void addAtIndex(int index, int val) {
+        if (index > size) {
+            return;
+        }
+        if (index < 0) {
+            index = 0;
+        }
+        size++;
+        //找到要插入节点的前驱
+        ListNode pred = head;
+        for (int i = 0; i < index; i++) {
+            pred = pred.next;
+        }
+        ListNode toAdd = new ListNode(val);
+        toAdd.next = pred.next;
+        pred.next = toAdd;
+    }
+ 
+    //删除第index个节点
+    public void deleteAtIndex(int index) {
+        if (index < 0 || index >= size) {
+            return;
+        }
+        size--;
+        if (index == 0) {
+            head = head.next;
+	    return;
+        }
+        ListNode pred = head;
+        for (int i = 0; i < index ; i++) {
+            pred = pred.next;
+        }
+        pred.next = pred.next.next;
+    }
+}
+
+ 双链表
+
+//双链表
+class ListNode{
+    int val;
+    ListNode next,prev;
+    ListNode() {};
+    ListNode(int val){
+        this.val = val;
+    }
+}
+ 
+ 
+class MyLinkedList {  
+ 
+    //记录链表中元素的数量
+    int size;
+    //记录链表的虚拟头结点和尾结点
+    ListNode head,tail;
+    
+    public MyLinkedList() {
+        //初始化操作
+        this.size = 0;
+        this.head = new ListNode(0);
+        this.tail = new ListNode(0);
+        //这一步非常关键，否则在加入头结点的操作中会出现null.next的错误！！！
+        head.next=tail;
+        tail.prev=head;
+    }
+    
+    public int get(int index) {
+        //判断index是否有效
+        if(index<0 || index>=size){
+            return -1;
+        }
+        ListNode cur = this.head;
+        //判断是哪一边遍历时间更短
+        if(index >= size / 2){
+            //tail开始
+            cur = tail;
+            for(int i=0; i< size-index; i++){
+                cur = cur.prev;
+            }
+        }else{
+            for(int i=0; i<= index; i++){
+                cur = cur.next; 
+            }
+        }
+        return cur.val;
+    }
+    
+    public void addAtHead(int val) {
+        //等价于在第0个元素前添加
+        addAtIndex(0,val);
+    }
+    
+    public void addAtTail(int val) {
+        //等价于在最后一个元素(null)前添加
+        addAtIndex(size,val);
+    }
+    
+    public void addAtIndex(int index, int val) {
+        //index大于链表长度
+        if(index>size){
+            return;
+        }
+        //index小于0
+        if(index<0){
+            index = 0;
+        }
+        size++;
+        //找到前驱
+        ListNode pre = this.head;
+        for(int i=0; i<index; i++){
+            pre = pre.next;
+        }
+        //新建结点
+        ListNode newNode = new ListNode(val);
+        newNode.next = pre.next;
+        pre.next.prev = newNode;
+        newNode.prev = pre;
+        pre.next = newNode;
+        
+    }
+    
+    public void deleteAtIndex(int index) {
+        //判断索引是否有效
+        if(index<0 || index>=size){
+            return;
+        }
+        //删除操作
+        size--;
+        ListNode pre = this.head;
+        for(int i=0; i<index; i++){
+            pre = pre.next;
+        }
+        pre.next.next.prev = pre;
+        pre.next = pre.next.next;
+    }
+}
+ 
+/**
+ * Your MyLinkedList object will be instantiated and called as such:
+ * MyLinkedList obj = new MyLinkedList();
+ * int param_1 = obj.get(index);
+ * obj.addAtHead(val);
+ * obj.addAtTail(val);
+ * obj.addAtIndex(index,val);
+ * obj.deleteAtIndex(index);
+ */
+
+206. 反转链表
+
+给你单链表的头节点 head ，请你反转链表，并返回反转后的链表。
+
+输入：head = [1,2,3,4,5]
+输出：[5,4,3,2,1]
+输入：head = [1,2]
+输出：[2,1]
+输入：head = []
+输出：[]
+解题思路：
+只需要改变链表的next指针的指向，直接将链表反转 ，而不用重新定义一个新的链表，如图所示:
+
+
+
+之前链表的头节点是元素1， 反转之后头结点就是元素5 ，这里并没有添加或者删除节点，仅仅是改变next指针的方向。
+
+首先定义一个cur指针，指向头结点，再定义一个pre指针，初始化为null。
+
+然后就要开始反转了，首先要把 cur->next 节点用tmp指针保存一下，也就是保存一下这个节点。
+
+为什么要保存一下这个节点呢，因为接下来要改变 cur->next 的指向了，将cur->next 指向pre ，此时已经反转了第一个节点了。
+
+接下来，就是循环走如下代码逻辑了，继续移动pre和cur指针。
+
+最后，cur 指针已经指向了null，循环结束，链表也反转完毕了。 此时我们return pre指针就可以了，pre指针就指向了新的头结点。
+
+ 代码实现
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode cur = head;
+        ListNode temp = null;
+        while (cur != null) {
+            temp = cur.next;// 保存下一个节点
+            cur.next = prev;
+            prev = cur;
+            cur = temp;
+        }
+        return prev;
+    }
+}
+
+总结：今天主要学习了链表的基本操作，重点是链表的定义的理解以及表头和表尾的处理。
