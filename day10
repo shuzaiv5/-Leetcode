@@ -1,0 +1,158 @@
+232. 用栈实现队列
+
+请你仅使用两个栈实现先入先出队列。队列应当支持一般队列支持的所有操作（push、pop、peek、empty）：
+
+实现 MyQueue 类：
+
+void push(int x) 将元素 x 推到队列的末尾
+int pop() 从队列的开头移除并返回元素
+int peek() 返回队列开头的元素
+boolean empty() 如果队列为空，返回 true ；否则，返回 false
+说明：
+
+你 只能 使用标准的栈操作 —— 也就是只有 push to top, peek/pop from top, size, 和 is empty 操作是合法的。
+你所使用的语言也许不支持栈。你可以使用 list 或者 deque（双端队列）来模拟一个栈，只要是标准的栈操作即可。
+
+示例 1：
+
+输入：
+["MyQueue", "push", "push", "peek", "pop", "empty"]
+[[], [1], [2], [], [], []]
+输出：
+[null, null, null, 1, 1, false]
+
+解释：
+MyQueue myQueue = new MyQueue();
+myQueue.push(1); // queue is: [1]
+myQueue.push(2); // queue is: [1, 2] (leftmost is front of the queue)
+myQueue.peek(); // return 1
+myQueue.pop(); // return 1, queue is [2]
+myQueue.empty(); // return false
+
+思路：
+
+代码随想录
+
+ 代码：
+
+class MyQueue {
+    Stack<Integer> stackIn;
+    Stack<Integer> stackOut;
+    public MyQueue() {
+        stackIn = new Stack<>();//输入栈
+        stackOut = new Stack<>();//输出栈
+    }
+    
+    public void push(int x) {
+        stackIn.push(x);//将x输入栈
+    }
+    
+    public int pop() {
+        dumpstackIn();
+        return stackOut.pop();//弹出栈操作
+    }
+    // get栈最上面元素
+    public int peek() {
+        dumpstackIn();
+        return stackOut.peek(); 
+    }
+    // 判断栈是否为空
+    public boolean empty() {
+        return stackIn.isEmpty() && stackOut.isEmpty();
+    }
+    // 如果stackOut为空，那么将stackIn中的元素全部放到stackOut中
+    private void dumpstackIn(){
+        if (!stackOut.isEmpty()) return; 
+        while (!stackIn.isEmpty()){
+                stackOut.push(stackIn.pop());
+        }
+    }
+}
+ 
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * MyQueue obj = new MyQueue();
+ * obj.push(x);
+ * int param_2 = obj.pop();
+ * int param_3 = obj.peek();
+ * boolean param_4 = obj.empty();
+ */
+
+225. 用队列实现栈
+力扣题目链接(opens new window)
+
+使用队列实现栈的下列操作：
+
+push(x) -- 元素 x 入栈
+pop() -- 移除栈顶元素
+top() -- 获取栈顶元素
+empty() -- 返回栈是否为空
+注意:
+
+你只能使用队列的基本操作-- 也就是 push to back, peek/pop from front, size, 和 is empty 这些操作是合法的。
+你所使用的语言也许不支持队列。 你可以使用 list 或者 deque（双端队列）来模拟一个队列 , 只要是标准的队列操作即可。
+你可以假设所有操作都是有效的（例如, 对一个空的栈不会调用 pop 或者 top 操作）
+解题思路：
+
+两个队列来实现栈的思路。
+
+队列是先进先出的规则，把一个队列中的数据导入另一个队列中，数据的顺序并没有变，并没有变成先进后出的顺序。
+
+所以用栈实现队列， 和用队列实现栈的思路还是不一样的，这取决于这两个数据结构的性质。
+
+但是依然还是要用两个队列来模拟栈，只不过没有输入和输出的关系，而是另一个队列完全用来备份的！
+
+用两个队列que1和que2实现队列的功能，que2其实完全就是一个备份的作用，把que1最后面的元素以外的元素都备份到que2，然后弹出最后面的元素，再把其他元素从que2导回que1。
+
+优化
+其实这道题目就是用一个队列就够了。
+
+一个队列在模拟栈弹出元素的时候只要将队列头部的元素（除了最后一个元素外） 重新添加到队列尾部，此时再去弹出元素就是栈的顺序了。
+
+ 代码：（两个Queue 实现）
+
+class MyStack {
+    Queue<Integer> q1; //和栈中保持一样的元素队列
+    Queue<Integer> q2; // 辅助队列
+    public MyStack() {
+        q1 = new LinkedList<>();//初始化
+        q2 = new LinkedList<>();
+    }
+    
+    public void push(int x) {
+        q2.offer(x); //将x放入辅助队列中
+        while(!q1.isEmpty()){
+            q2.offer(q1.poll());
+        }
+        Queue<Integer> qTemp;
+        qTemp = q1;
+        q1 = q2;
+        q2 = qTemp; // 交换q1和q2，放入q1中
+    }
+    // 因为queue1中的元素和栈中的保持一致，所以这个和下面两个的操作只看queue1即可
+    public int pop() {
+        return q1.poll();
+    }
+    // 栈顶元素
+    public int top() {
+        return q1.peek();
+    }
+    //栈是否为空
+    public boolean empty() {
+        return q1.isEmpty();
+    }
+}
+ 
+/**
+ * Your MyStack object will be instantiated and called as such:
+ * MyStack obj = new MyStack();
+ * obj.push(x);
+ * int param_2 = obj.pop();
+ * int param_3 = obj.top();
+ * boolean param_4 = obj.empty();
+ */
+
+总结：栈和队列的基本操作。
+————————————————
+版权声明：本文为CSDN博主「shuzai1」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/shuzai1/article/details/128572773
