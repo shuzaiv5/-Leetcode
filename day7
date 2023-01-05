@@ -1,0 +1,285 @@
+第454题.四数相加II 
+
+给定四个包含整数的数组列表 A , B , C , D ,计算有多少个元组 (i, j, k, l) ，使得 A[i] + B[j] + C[k] + D[l] = 0。
+
+为了使问题简单化，所有的 A, B, C, D 具有相同的长度 N，且 0 ≤ N ≤ 500 。所有整数的范围在 -2^28 到 2^28 - 1 之间，最终结果不会超过 2^31 - 1 。
+
+例如:
+
+输入:
+
+A = [ 1, 2]
+B = [-2,-1]
+C = [-1, 2]
+D = [ 0, 2]
+输出:
+
+2
+
+解释:
+
+两个元组如下:
+
+(0, 0, 0, 1) -> A[0] + B[0] + C[0] + D[1] = 1 + (-2) + (-1) + 2 = 0
+(1, 1, 0, 0) -> A[1] + B[1] + C[0] + D[0] = 2 + (-1) + (-1) + 0 = 0
+解题思路：利用Hash Map 来解题，遍历两个数组A，B；用Map的key用来存放a+b,val存放a+b出现的次数，遍历C，D数组，定义count来统计a+b+c+d = 0 出现的次数，找到0-（c+d）在map中出现的次数，count += val就是最终的次数。
+代码：
+
+class Solution {
+    public int fourSumCount(int[] nums1, int[] nums2, int[] nums3, int[] nums4) {
+        Map<Integer, Integer> map = new HashMap<>();
+        int temp;
+        int sum = 0;
+        // 统计a+b的和及其出现次数，存入map中
+        for(int a: nums1){
+            for(int b: nums2){
+                temp = a + b;
+                if(map.containsKey(temp)){
+                    map.put(temp, map.get(temp) + 1);//统计a+b出现次数
+                }else {
+                    map.put(temp, 1);
+                }
+            }          
+        }
+        //统计c+d的和，以及找出map里面a+b+c+d=0的情况，并计数
+        for(int c: nums3){
+            for(int d: nums4){
+                temp = c + d;
+                if(map.containsKey(0-temp)){
+                    sum += map.get(0 - temp);
+                }
+            }
+        }
+        return sum;
+    }
+}
+
+#383. 赎金信
+给定一个赎金信 (ransom) 字符串和一个杂志(magazine)字符串，判断第一个字符串 ransom 能不能由第二个字符串 magazines 里面的字符构成。如果可以构成，返回 true ；否则返回 false。
+
+(题目说明：为了不暴露赎金信字迹，要从杂志上搜索各个需要的字母，组成单词来表达意思。杂志字符串中的每个字符只能在赎金信字符串中使用一次。)
+
+注意：
+
+你可以假设两个字符串均只含有小写字母。
+
+canConstruct("a", "b") -> false
+canConstruct("aa", "ab") -> false
+canConstruct("aa", "aab") -> true
+
+解题思路：
+一，暴力解法：枚举，两个for循环，不断查找
+
+// 时间复杂度: O(n^2)
+// 空间复杂度：O(1)
+class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        for (int i = 0; i < magazine.length(); i++) {
+            for (int j = 0; j < ransomNote.length(); j++) {
+                // 在ransomNote中找到和magazine相同的字符
+                if (magazine[i] == ransomNote[j]) {
+                    ransomNote.erase(ransomNote.begin() + j); // ransomNote删除这个字符
+                    break;
+                }
+            }
+        }
+        // 如果ransomNote为空，则说明magazine的字符可以组成ransomNote
+        if (ransomNote.length() == 0) {
+            return true;
+        }
+        return false;
+    }
+};
+
+解法二：哈希解法
+
+因为题目所只有小写字母，那可以采用空间换取时间的哈希策略， 用一个长度为26的数组还记录magazine里字母出现的次数。
+
+然后再用ransomNote去验证这个数组是否包含了ransomNote所需要的所有字母。
+
+class Solution {
+    public boolean canConstruct(String ransomNote, String magazine) {
+        // 定义一个哈希映射数组
+        int[] record = new int[26];
+ 
+        // 遍历
+        for(char c : magazine.toCharArray()){
+            record[c - 'a'] += 1;
+        }
+ 
+        for(char c : ransomNote.toCharArray()){
+            record[c - 'a'] -= 1;
+        }
+        
+        // 如果数组中存在负数，说明ransomNote字符串总存在magazine中没有的字符
+        for(int i : record){
+            if(i < 0){
+                return false;
+            }
+        }
+ 
+        return true;
+    }
+}
+
+第15题. 三数之和
+力扣题目链接(opens new window)
+
+给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。
+
+注意： 答案中不可以包含重复的三元组。
+
+示例：
+
+给定数组 nums = [-1, 0, 1, 2, -1, -4]，
+
+满足要求的三元组集合为： [ [-1, 0, 1], [-1, -1, 2] ]
+
+解题思路：
+利用双指针操作，
+
+首先将数组排序，然后有一层for循环，i从下标0的地方开始，同时定一个下标left 定义在i+1的位置上，定义下标right 在数组结尾的位置上。
+
+依然还是在数组中找到 abc 使得a + b +c =0，我们这里相当于 a = nums[i]，b = nums[left]，c = nums[right]。
+
+接下来如何移动left 和right呢， 如果nums[i] + nums[left] + nums[right] > 0 就说明 此时三数之和大了，因为数组是排序后了，所以right下标就应该向左移动，这样才能让三数之和小一些。
+
+如果 nums[i] + nums[left] + nums[right] < 0 说明 此时 三数之和小了，left 就向右移动，才能让三数之和大一些，直到left与right相遇为止。
+
+时间复杂度：O(n^2)。
+
+去重逻辑的思考
+#a的去重
+说道去重，其实主要考虑三个数的去重。 a, b ,c, 对应的就是 nums[i]，nums[left]，nums[right]
+
+a 如果重复了怎么办，a是nums里遍历的元素，那么应该直接跳过去。
+
+但这里有一个问题，是判断 nums[i] 与 nums[i + 1]是否相同，还是判断 nums[i] 与 nums[i-1] 是否相同。
+
+应该这么写：
+
+if (i > 0 && nums[i] == nums[i - 1]) {
+    continue;
+}
+这么写就是当前使用 nums[i]，我们判断前一位是不是一样的元素，在看 {-1, -1 ,2} 这组数据，当遍历到 第一个 -1 的时候，只要前一位没有-1，那么 {-1, -1 ,2} 这组数据一样可以收录到 结果集里。
+
+#b与c的去重
+拿right去重为例，即使不加这个去重逻辑，依然根据 while (right > left) 和 if (nums[i] + nums[left] + nums[right] > 0) 去完成right-- 的操作。
+
+多加了 while (left < right && nums[right] == nums[right + 1]) right--; 这一行代码，其实就是把 需要执行的逻辑提前执行了，但并没有减少 判断的逻辑。
+
+最直白的思考过程，就是right还是一个数一个数的减下去的，所以在哪里减的都是一样的。
+
+代码：
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+	// 找出a + b + c = 0
+        // a = nums[i], b = nums[left], c = nums[right]
+        for (int i = 0; i < nums.length; i++) {
+	    // 排序之后如果第一个元素已经大于零，那么无论如何组合都不可能凑成三元组，直接返回结果就可以了
+            if (nums[i] > 0) { 
+                return result;
+            }
+ 
+            if (i > 0 && nums[i] == nums[i - 1]) {  // 去重a
+                continue;
+            }
+ 
+            int left = i + 1;
+            int right = nums.length - 1;
+            while (right > left) {
+                int sum = nums[i] + nums[left] + nums[right];
+                if (sum > 0) {
+                    right--;
+                } else if (sum < 0) {
+                    left++;
+                } else {
+                    result.add(Arrays.asList(nums[i], nums[left], nums[right]));
+		    // 去重逻辑应该放在找到一个三元组之后，对b 和 c去重
+                    while (right > left && nums[right] == nums[right - 1]) right--;
+                    while (right > left && nums[left] == nums[left + 1]) left++;
+                    
+                    right--; 
+                    left++;
+                }
+            }
+        }
+        return result;
+    }
+}
+
+ 
+
+第18题. 四数之和
+力扣题目链接(opens new window)
+
+题意：给定一个包含 n 个整数的数组 nums 和一个目标值 target，判断 nums 中是否存在四个元素 a，b，c 和 d ，使得 a + b + c + d 的值与 target 相等？找出所有满足条件且不重复的四元组。
+
+注意：
+
+答案中不可以包含重复的四元组。
+
+示例： 给定数组 nums = [1, 0, -1, 0, -2, 2]，和 target = 0。 满足要求的四元组集合为： [ [-1, 0, 0, 1], [-2, -1, 1, 2], [-2, 0, 0, 2] ]
+
+解题思路：
+和三数之和思路一样，双指针法，再加多一个for循环。
+
+ 细节：不要判断nums[k] > target 就返回了，三数之和 可以通过 nums[i] > 0 就返回了，因为 0 已经是确定的数了，四数之和这道题目 target是任意值。比如：数组是[-4, -3, -2, -1]，target是-10，不能因为-4 > -10而跳过。但是我们依旧可以去做剪枝，逻辑变成nums[i] > target && (nums[i] >=0 || target >= 0)就可以了。
+
+代码：
+
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+       
+        for (int i = 0; i < nums.length; i++) {
+		
+            // nums[i] > target 直接返回, 剪枝操作
+            if (nums[i] > 0 && nums[i] > target) {
+                return result;
+            }
+		
+            if (i > 0 && nums[i - 1] == nums[i]) {    // 对nums[i]去重
+                continue;
+            }
+            
+            for (int j = i + 1; j < nums.length; j++) {
+ 
+                if (j > i + 1 && nums[j - 1] == nums[j]) {  // 对nums[j]去重
+                    continue;
+                }
+ 
+                int left = j + 1;
+                int right = nums.length - 1;
+                while (right > left) {
+		    // nums[k] + nums[i] + nums[left] + nums[right] > target int会溢出
+                    long sum = (long) nums[i] + nums[j] + nums[left] + nums[right];
+                    if (sum > target) {
+                        right--;
+                    } else if (sum < target) {
+                        left++;
+                    } else {
+                        result.add(Arrays.asList(nums[i], nums[j], nums[left], nums[right]));
+                        // 对nums[left]和nums[right]去重
+                        while (right > left && nums[right] == nums[right - 1]) right--;
+                        while (right > left && nums[left] == nums[left + 1]) left++;
+ 
+                        left++;
+                        right--;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
+
+总结：对于不同的题目需要不同的思想解法来达到事半功倍的效果，Hash解法的适用条件和场景以及去重复操作，在这些题目中都有着很好的体现，很有体会。
+————————————————
+版权声明：本文为CSDN博主「shuzai1」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/shuzai1/article/details/128572699
