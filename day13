@@ -1,0 +1,251 @@
+239. 滑动窗口最大值
+力扣题目链接(opens new window)
+
+给定一个数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+
+返回滑动窗口中的最大值。
+
+进阶：
+
+你能在线性时间复杂度内解决此题吗？
+
+提示：
+
+1 <= nums.length <= 10^5
+-10^4 <= nums[i] <= 10^4
+1 <= k <= nums.length
+#思路
+《代码随想录》算法视频公开课：单调队列正式登场！| LeetCode：239. 滑动窗口最大值 (opens new window)，相信结合视频在看本篇题解，更有助于大家对本题的理解。
+
+这是使用单调队列的经典题目。
+
+难点是如何求一个区间里的最大值呢？ （这好像是废话），暴力一下不就得了。
+
+暴力方法，遍历一遍的过程中每次从窗口中再找到最大的数值，这样很明显是O(n × k)的算法。
+
+有的同学可能会想用一个大顶堆（优先级队列）来存放这个窗口里的k个数字，这样就可以知道最大的最大值是多少了， 但是问题是这个窗口是移动的，而大顶堆每次只能弹出最大值，我们无法移除其他数值，这样就造成大顶堆维护的不是滑动窗口里面的数值了。所以不能用大顶堆。
+
+此时我们需要一个队列，这个队列呢，放进去窗口里的元素，然后随着窗口的移动，队列也一进一出，每次移动之后，队列告诉我们里面的最大值是什么。
+
+其实队列没有必要维护窗口里的所有元素，只需要维护有可能成为窗口里最大值的元素就可以了，同时保证队列里的元素数值是由大到小的。
+
+那么这个维护元素单调递减的队列就叫做单调队列，即单调递减或单调递增的队列。C++中没有直接支持单调队列，需要我们自己来实现一个单调队列
+
+不要以为实现的单调队列就是 对窗口里面的数进行排序，如果排序的话，那和优先级队列又有什么区别了呢。
+
+对于窗口里的元素{2, 3, 5, 1 ,4}，单调队列里只维护{5, 4} 就够了，保持单调队列里单调递减，此时队列出口元素就是窗口里最大元素。
+
+此时大家应该怀疑单调队列里维护着{5, 4} 怎么配合窗口进行滑动呢？
+
+设计单调队列的时候，pop，和push操作要保持如下规则：
+
+pop(value)：如果窗口移除的元素value等于单调队列的出口元素，那么队列弹出元素，否则不用任何操作
+push(value)：如果push的元素value大于入口元素的数值，那么就将队列入口的元素弹出，直到push元素的数值小于等于队列入口元素的数值为止
+保持如上规则，每次窗口移动的时候，只要问que.front()就可以返回当前窗口的最大值。
+
+那么我们用什么数据结构来实现这个单调队列呢？
+
+使用deque最为合适，在文章栈与队列：来看看栈和队列不为人知的一面 (opens new window)中，我们就提到了常用的queue在没有指定容器的情况下，deque就是默认底层容器。
+
+//解法一
+//自定义数组
+class MyQueue {
+    Deque<Integer> deque = new LinkedList<>();
+    //弹出元素时，比较当前要弹出的数值是否等于队列出口的数值，如果相等则弹出
+    //同时判断队列当前是否为空
+    void poll(int val) {
+        if (!deque.isEmpty() && val == deque.peek()) {
+            deque.poll();
+        }
+    }
+    //添加元素时，如果要添加的元素大于入口处的元素，就将入口元素弹出
+    //保证队列元素单调递减
+    //比如此时队列元素3,1，2将要入队，比1大，所以1弹出，此时队列：3,2
+    void add(int val) {
+        while (!deque.isEmpty() && val > deque.getLast()) {
+            deque.removeLast();
+        }
+        deque.add(val);
+    }
+    //队列队顶元素始终为最大值
+    int peek() {
+        return deque.peek();
+    }
+}
+ 
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if (nums.length == 1) {
+            return nums;
+        }
+        int len = nums.length - k + 1;
+        //存放结果元素的数组
+        int[] res = new int[len];
+        int num = 0;
+        //自定义队列
+        MyQueue myQueue = new MyQueue();
+        //先将前k的元素放入队列
+        for (int i = 0; i < k; i++) {
+            myQueue.add(nums[i]);
+        }
+        res[num++] = myQueue.peek();
+        for (int i = k; i < nums.length; i++) {
+            //滑动窗口移除最前面的元素，移除是判断该元素是否放入队列
+            myQueue.poll(nums[i - k]);
+            //滑动窗口加入最后面的元素
+            myQueue.add(nums[i]);
+            //记录对应的最大值
+            res[num++] = myQueue.peek();
+        }
+        return res;
+    }
+}
+ 
+//解法二
+//利用双端队列手动实现单调队列
+/**
+ * 用一个单调队列来存储对应的下标，每当窗口滑动的时候，直接取队列的头部指针对应的值放入结果集即可
+ * 单调队列类似 （tail -->） 3 --> 2 --> 1 --> 0 (--> head) (右边为头结点，元素存的是下标)
+ */
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        ArrayDeque<Integer> deque = new ArrayDeque<>();
+        int n = nums.length;
+        int[] res = new int[n - k + 1];
+        int idx = 0;
+        for(int i = 0; i < n; i++) {
+            // 根据题意，i为nums下标，是要在[i - k + 1, i] 中选到最大值，只需要保证两点
+            // 1.队列头结点需要在[i - k + 1, i]范围内，不符合则要弹出
+            while(!deque.isEmpty() && deque.peek() < i - k + 1){
+                deque.poll();
+            }
+            // 2.既然是单调，就要保证每次放进去的数字要比末尾的都大，否则也弹出
+            while(!deque.isEmpty() && nums[deque.peekLast()] < nums[i]) {
+                deque.pollLast();
+            }
+ 
+            deque.offer(i);
+ 
+            // 因为单调，当i增长到符合第一个k范围的时候，每滑动一步都将队列头节点放入结果就行了
+            if(i >= k - 1){
+                res[idx++] = nums[deque.peek()];
+            }
+        }
+        return res;
+    }
+}
+
+ 
+
+347.前 K 个高频元素
+力扣题目链接(opens new window)
+
+给定一个非空的整数数组，返回其中出现频率前 k 高的元素。
+
+示例 1:
+
+输入: nums = [1,1,1,2,2,3], k = 2
+输出: [1,2]
+示例 2:
+
+输入: nums = [1], k = 1
+输出: [1]
+提示：
+
+你可以假设给定的 k 总是合理的，且 1 ≤ k ≤ 数组中不相同的元素的个数。
+你的算法的时间复杂度必须优于 $O(n \log n)$ , n 是数组的大小。
+题目数据保证答案唯一，换句话说，数组中前 k 个高频元素的集合是唯一的。
+你可以按任意顺序返回答案。
+思路：
+
+这道题目主要涉及到如下三块内容：
+
+要统计元素出现频率
+对频率排序
+找出前K个高频元素
+首先统计元素出现的频率，这一类的问题可以使用map来进行统计。
+
+然后是对频率进行排序，这里我们可以使用一种 容器适配器就是优先级队列。
+
+什么是优先级队列呢？
+
+其实就是一个披着队列外衣的堆，因为优先级队列对外接口只是从队头取元素，从队尾添加元素，再无其他取元素的方式，看起来就是一个队列。
+
+而且优先级队列内部元素是自动依照元素的权值排列。那么它是如何有序排列的呢？
+
+缺省情况下priority_queue利用max-heap（大顶堆）完成对元素的排序，这个大顶堆是以vector为表现形式的complete binary tree（完全二叉树）。
+
+什么是堆呢？
+
+堆是一棵完全二叉树，树中每个结点的值都不小于（或不大于）其左右孩子的值。 如果父亲结点是大于等于左右孩子就是大顶堆，小于等于左右孩子就是小顶堆。
+
+所以大家经常说的大顶堆（堆头是最大元素），小顶堆（堆头是最小元素），如果懒得自己实现的话，就直接用priority_queue（优先级队列）就可以了，底层实现都是一样的，从小到大排就是小顶堆，从大到小排就是大顶堆。
+
+本题我们就要使用优先级队列来对部分频率进行排序。
+
+为什么不用快排呢， 使用快排要将map转换为vector的结构，然后对整个数组进行排序， 而这种场景下，我们其实只需要维护k个有序的序列就可以了，所以使用优先级队列是最优的。
+
+此时要思考一下，是使用小顶堆呢，还是大顶堆？
+
+有的同学一想，题目要求前 K 个高频元素，那么果断用大顶堆啊。
+
+那么问题来了，定义一个大小为k的大顶堆，在每次移动更新大顶堆的时候，每次弹出都把最大的元素弹出去了，那么怎么保留下来前K个高频元素呢。
+
+而且使用大顶堆就要把所有元素都进行排序，那能不能只排序k个元素呢？
+
+所以我们要用小顶堆，因为要统计最大前k个元素，只有小顶堆每次将最小的元素弹出，最后小顶堆里积累的才是前k个最大元素。
+
+/*Comparator接口说明:
+ * 返回负数，形参中第一个参数排在前面；返回正数，形参中第二个参数排在前面
+ * 对于队列：排在前面意味着往队头靠
+ * 对于堆（使用PriorityQueue实现）：从队头到队尾按从小到大排就是最小堆（小顶堆），
+ *                                从队头到队尾按从大到小排就是最大堆（大顶堆）--->队头元素相当于堆的根节点
+ * */
+class Solution {
+    //解法1：基于大顶堆实现
+    public int[] topKFrequent1(int[] nums, int k) {
+        Map<Integer,Integer> map = new HashMap<>();//key为数组元素值,val为对应出现次数
+        for(int num:nums){
+            map.put(num,map.getOrDefault(num,0)+1);
+        }
+        //在优先队列中存储二元组(num,cnt),cnt表示元素值num在数组中的出现次数
+        //出现次数按从队头到队尾的顺序是从大到小排,出现次数最多的在队头(相当于大顶堆)
+        PriorityQueue<int[]> pq = new PriorityQueue<>((pair1, pair2)->pair2[1]-pair1[1]);
+        for(Map.Entry<Integer,Integer> entry:map.entrySet()){//大顶堆需要对所有元素进行排序
+            pq.add(new int[]{entry.getKey(),entry.getValue()});
+        }
+        int[] ans = new int[k];
+        for(int i=0;i<k;i++){//依次从队头弹出k个,就是出现频率前k高的元素
+            ans[i] = pq.poll()[0];
+        }
+        return ans;
+    }
+    //解法2：基于小顶堆实现
+    public int[] topKFrequent2(int[] nums, int k) {
+        Map<Integer,Integer> map = new HashMap<>();//key为数组元素值,val为对应出现次数
+        for(int num:nums){
+            map.put(num,map.getOrDefault(num,0)+1);
+        }
+        //在优先队列中存储二元组(num,cnt),cnt表示元素值num在数组中的出现次数
+        //出现次数按从队头到队尾的顺序是从小到大排,出现次数最低的在队头(相当于小顶堆)
+        PriorityQueue<int[]> pq = new PriorityQueue<>((pair1,pair2)->pair1[1]-pair2[1]);
+        for(Map.Entry<Integer,Integer> entry:map.entrySet()){//小顶堆只需要维持k个元素有序
+            if(pq.size()<k){//小顶堆元素个数小于k个时直接加
+                pq.add(new int[]{entry.getKey(),entry.getValue()});
+            }else{
+                if(entry.getValue()>pq.peek()[1]){//当前元素出现次数大于小顶堆的根结点(这k个元素中出现次数最少的那个)
+                    pq.poll();//弹出队头(小顶堆的根结点),即把堆里出现次数最少的那个删除,留下的就是出现次数多的了
+                    pq.add(new int[]{entry.getKey(),entry.getValue()});
+                }
+            }
+        }
+        int[] ans = new int[k];
+        for(int i=k-1;i>=0;i--){//依次弹出小顶堆,先弹出的是堆的根,出现次数少,后面弹出的出现次数多
+            ans[i] = pq.poll()[0];
+        }
+        return ans;
+    }
+}
+
+ 
+
